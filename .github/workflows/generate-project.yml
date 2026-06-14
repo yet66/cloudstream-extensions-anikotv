@@ -1,32 +1,32 @@
-name: Generate Project Files
+name: Generate All Project Files
 
 on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  workflows: write   # Required to push workflow files (.github/workflows/*.yml)
+  contents: write    # needed to push to main
 
 jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repository (using PAT)
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.PAT_TOKEN }}
           fetch-depth: 0
 
-      - name: Create folder structure and write files
+      - name: Create entire project structure
         shell: bash
         run: |
-          # Create root directories
+          # Create directories
           mkdir -p .github/workflows
           mkdir -p AnikoTvProvider/src/main/kotlin/com/anikotv
+          mkdir -p gradle/wrapper
 
           # -------------------------------
-          # Root configuration files
+          # Root Gradle files
           # -------------------------------
-
           cat << 'EOF' > settings.gradle.kts
           rootProject.name = "CloudstreamPlugins"
 
@@ -392,9 +392,15 @@ jobs:
           EOF
 
           # -------------------------------
-          # GitHub Actions workflow files
+          # Generate Gradle wrapper files
           # -------------------------------
+          # Create an empty settings.gradle.kts for wrapper generation (already exists)
+          # Use the pre-installed Gradle to generate wrapper
+          gradle wrapper --gradle-version 8.5
 
+          # -------------------------------
+          # The build.yml workflow (this will be committed by PAT)
+          # -------------------------------
           cat << 'EOF' > .github/workflows/build.yml
           name: Build
 
@@ -456,11 +462,11 @@ jobs:
                     git push --force
           EOF
 
-          echo "All files created successfully."
+          echo "All files generated successfully."
 
-      - name: Commit and push changes
+      - name: Commit and push all generated files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Generate full project structure via workflow"
+          commit_message: "Generate complete CloudStream extension project"
           branch: main
-          file_pattern: "*.gradle.kts *.properties .gitignore *.json *.md .github/workflows/* AnikoTvProvider/**/*"
+          file_pattern: "."
