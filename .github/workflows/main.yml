@@ -2,10 +2,10 @@ name: Generate Project Files
 
 on:
   workflow_dispatch:
-    # No inputs needed – will generate all files as defined below
 
 permissions:
-  contents: write  # Required to push commits
+  contents: write
+  workflows: write   # Required to push workflow files (.github/workflows/*.yml)
 
 jobs:
   generate:
@@ -75,7 +75,7 @@ jobs:
               apply(plugin = "com.lagradost.cloudstream3.gradle")
 
               cloudstream {
-                  setRepo(System.getenv("GITHUB_REPOSITORY") ?: "yet66/TestPlugins")
+                  setRepo(System.getenv("GITHUB_REPOSITORY") ?: "yet66/cloudstream-extensions-anikotv")
                   authors = listOf("yet66")
               }
 
@@ -146,11 +146,11 @@ jobs:
 
           cat << 'EOF' > repo.json
           {
-            "name": "TestPlugins Repository",
-            "description": "CloudStream 3 plugins by yet66",
+            "name": "cloudstream-extensions-anikotv",
+            "description": "CloudStream 3 AnikoTV plugin by yet66",
             "manifestVersion": 1,
             "pluginLists": [
-              "https://raw.githubusercontent.com/yet66/TestPlugins/builds/plugins.json"
+              "https://raw.githubusercontent.com/yet66/cloudstream-extensions-anikotv/builds/plugins.json"
             ]
           }
           EOF
@@ -165,7 +165,7 @@ jobs:
           1. Open CloudStream 3
           2. Go to Settings → Extensions → Repository
           3. Add this repository URL:
-             `https://raw.githubusercontent.com/yet66/TestPlugins/builds/plugins.json`
+             `https://raw.githubusercontent.com/yet66/cloudstream-extensions-anikotv/builds/plugins.json`
           4. Install the AnikoTV extension
 
           ## Features
@@ -330,7 +330,6 @@ jobs:
           import com.lagradost.cloudstream3.utils.ExtractorLink
           import com.lagradost.cloudstream3.utils.ExtractorLinkType
           import com.lagradost.cloudstream3.utils.SubtitleFile
-          import com.lagradost.cloudstream3.utils.loadExtractor
           import org.jsoup.Jsoup
 
           class Extractor {
@@ -375,7 +374,7 @@ jobs:
                                   source = "AnikoTV",
                                   name = "AnikoTV - $quality",
                                   url = videoUrl,
-                                  referer = "$mainUrl",
+                                  referer = "https://anikototv.to",
                                   quality = quality,
                                   type = if (videoUrl.endsWith(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
                               )
@@ -393,9 +392,9 @@ jobs:
           EOF
 
           # -------------------------------
-          # GitHub Actions workflow file (this one)
-          # but we also need the build workflow
+          # GitHub Actions workflow files
           # -------------------------------
+
           cat << 'EOF' > .github/workflows/build.yml
           name: Build
 
